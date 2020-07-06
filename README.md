@@ -1,18 +1,16 @@
-#Multi-Path Region Mining For Weakly Supervised 3D Semantic Segmentation on Point Clouds
+# Multi-Path Region Mining For Weakly Supervised 3D Semantic Segmentation on Point Clouds
 
 This repository contains the implementation of our CVPR2020 paper Multi Path Region Mining For Weakly Supervised 3D Semantic Segmentation on Point Clouds(MPRM)([paper](https://openaccess.thecvf.com/content_CVPR_2020/papers/Wei_Multi-Path_Region_Mining_for_Weakly_Supervised_3D_Semantic_Segmentation_on_CVPR_2020_paper.pdf))
 
 
 
-
-
-##Installation
+## Installation
 This project is developed based on Kernel Point Convolution [KPConv](https://arxiv.org/abs/1904.08889) ([repo](https://github.com/HuguesTHOMAS/KPConv)).
 You can follow the original KPConv [installation guide](https://github.com/HuguesTHOMAS/KPConv/blob/master/INSTALL.md) for ubuntu 16.04 and 18.04.
 
 If you want to use [dense-crf](https://arxiv.org/abs/1210.5644) for post-processing, install pydense-crf following this [repo](https://github.com/lucasb-eyer/pydensecrf)
 
-##Training
+## Training
 1. Download the Scannet dataset through the [official webcite](http://kaldir.vc.in.tum.de/scannet_benchmark/documentation).
 
 2. Modify the dataset path in 'datasets/Scannet_subcloud.py' And start training:
@@ -42,7 +40,7 @@ python training_segmentation.py
 '''
 
 
-##Citining this work
+## Citing this work
 If you find this work useful, please cite:
 [Multi Path Region Mining For Weakly Supervised 3D Semantic Segmentation on Point Clouds](https://openaccess.thecvf.com/content_CVPR_2020/papers/Wei_Multi-Path_Region_Mining_for_Weakly_Supervised_3D_Semantic_Segmentation_on_CVPR_2020_paper.pdf))
 '''
@@ -55,10 +53,10 @@ If you find this work useful, please cite:
 }
 '''
 
-##Acknowledgement
+## Acknowledgement
 This project is developed based on [KPConv] (https://arxiv.org/abs/1904.08889) ([repo](https://github.com/HuguesTHOMAS/KPConv)).
 We also thanks  [dense-crf](https://arxiv.org/abs/1210.5644)[repo](https://github.com/lucasb-eyer/pydensecrf) and [nanoflann](https://github.com/jlblancoc/nanoflann).
 
-##License
+## License
 Our code is released under MIT License (see LICENSE file for details).
 
