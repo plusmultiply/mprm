@@ -54,7 +54,7 @@ If you find this work useful, please cite:
 ```
 
 ## Acknowledgement
-This project is developed based on [KPConv] (https://arxiv.org/abs/1904.08889) ([repo](https://github.com/HuguesTHOMAS/KPConv)).
+This project is developed based on [KPConv](https://arxiv.org/abs/1904.08889) ([repo](https://github.com/HuguesTHOMAS/KPConv)).
 We also thanks  [dense-crf](https://arxiv.org/abs/1210.5644)[repo](https://github.com/lucasb-eyer/pydensecrf) and [nanoflann](https://github.com/jlblancoc/nanoflann).
 
 ## License
