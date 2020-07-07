@@ -1,26 +1,3 @@
-#
-#
-#      0=========================0
-#      |    Kernel Point CNN     |
-#      0=========================0
-#
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Handle Scannet dataset in a class
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Hugues THOMAS - 11/06/2018
-#
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#           Imports and global variables
-#       \**********************************/
-#
-
 # Basic libs
 import json
 import os
@@ -138,8 +115,10 @@ class ScannetDataset(Dataset):
         ##########################
 
         # Path of the folder containing ply files
-        self.path = '/home/jiacheng/Dataset/ScanNet/Scannet'
-        self.psdudo_label_path = '/home/jiacheng/Dataset/ScanNet/pseudo_mask/psa_dp_crf/'
+        self.path = ''
+        
+        # Path for pseudo labels
+        self.psdudo_label_path = ''
 
 
         # Path of the training files
