@@ -117,10 +117,11 @@ def crf_process(points, colors, preds, num_classes):
 
 
 if __name__ == '__main__':
-    path = '/home/jiacheng/codes/KPconv/test/psa_mb_no_dual_no_dp_4dim_long/val_probs'
+    
+    path = ''   #path for generated pseudo label
 
     files = listdir(path)
-    pseudo_mask_path = '/mnt/sdc1/jiacheng/pseudo_mask/psa_mb_nodp_crf_4dim_80epoch/'
+    pseudo_mask_path = ''    #path to save the final pseudo label
     num_classes = 20
     Confs = []
     Confs_ori = []
