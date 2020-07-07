@@ -1,26 +1,3 @@
-#
-#
-#      0=================================0
-#      |    Kernel Point Convolutions    |
-#      0=================================0
-#
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Callable script to start a training on S3DIS dataset
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Hugues THOMAS - 11/06/2018
-#
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#           Imports and global variables
-#       \**********************************/
-#
-
 
 # Common libs
 import time
@@ -154,9 +131,9 @@ class ScannetConfig(Config):
 
     # Do we nee to save convergence
     saving = True
-    saving_path = '/mnt/sdc1/jiacheng/kp_results/psa_mb_no_dual_no_dp_4dim_again'
+    saving_path = ''    #your model saving path here
 
-    setting = 'psa_4branch_nodual'
+    setting = ''
 
     dropout_threshold = 0.5
     dropout_prob = 0.5
