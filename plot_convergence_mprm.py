@@ -1,25 +1,4 @@
-#
-#
-#      0=================================0
-#      |    Kernel Point Convolutions    |
-#      0=================================0
-#
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Callable script to test any model on any dataset
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Hugues THOMAS - 11/06/2018
-#
 
-
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#           Imports and global variables
-#       \**********************************/
-#
 
 # Common libs
 import numpy as np
@@ -824,12 +803,14 @@ if __name__ == '__main__':
     ######################################################
 
     # Using the dates of the logs, you can easily gather consecutive ones. All logs should be of the same dataset.
-    #start = '/home/jiacheng/codes/KPConv/results/Log_2019-09-29_13-42-38'
-    #end = '/home/jiacheng/codes/KPConv/results/Log_2019-09-29_13-42-38'
+    #start = ''
+    #end = ''
     #logs = np.sort([join('results', l) for l in listdir('results') if start <= l <= end])
-    logs = ['/mnt/sdc1/jiacheng/kp_results/psa_mb_no_dual_no_dp_4dim_again']
+    
+    #specify log path
+    logs = ['']
     # Give names to the logs (for legends)
-    logs_names = ['4dim']
+    logs_names = ['']
     logs_names = np.array(logs_names[:len(logs)])
 
     ################################################################
@@ -853,24 +834,9 @@ if __name__ == '__main__':
     compare_trainings(logs, logs_names)
 
     # Plot the validation
-    if plot_dataset.startswith('Shape'):
-        compare_convergences_multisegment(logs, logs_names)
-    elif plot_dataset.startswith('S3DIS'):
-        dataset = S3DISDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    elif plot_dataset.startswith('Model'):
-        dataset = ModelNet40Dataset()
-        compare_convergences_classif(dataset, logs, logs_names)
-    elif plot_dataset.startswith('Scann'):
-        dataset = ScannetDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    elif plot_dataset.startswith('Seman'):
-        dataset = Semantic3DDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    elif plot_dataset.startswith('NPM3D'):
-        dataset = NPM3DDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    else:
-        raise ValueError('Unsupported dataset : ' + plot_dataset)
+
+    dataset = ScannetDataset()
+    compare_convergences_segment(dataset, logs, logs_names)
+
 
 
