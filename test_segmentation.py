@@ -1,25 +1,4 @@
-#
-#
-#      0=================================0
-#      |    Kernel Point Convolutions    |
-#      0=================================0
-#
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Callable script to test any model on any dataset
-#
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Hugues THOMAS - 11/06/2018
-#
 
-
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#           Imports and global variables
-#       \**********************************/
-#
 
 # Common libs
 import time
@@ -91,21 +70,9 @@ def test_caller(path, step_ind, on_val):
     print('*******************')
 
     # Initiate dataset configuration
-    if config.dataset.startswith('ModelNet40'):
-        dataset = ModelNet40Dataset(config.input_threads)
-    elif config.dataset == 'S3DIS':
-        dataset = S3DISDataset(config.input_threads)
-        on_val = True
-    elif config.dataset == 'Scannet':
-        dataset = ScannetDataset(config.input_threads, load_test=(not on_val))
-    elif config.dataset.startswith('ShapeNetPart'):
-        dataset = ShapeNetPartDataset(config.dataset.split('_')[1], config.input_threads)
-    elif config.dataset == 'NPM3D':
-        dataset = NPM3DDataset(config.input_threads, load_test=(not on_val))
-    elif config.dataset == 'Semantic3D':
-        dataset = Semantic3DDataset(config.input_threads)
-    else:
-        raise ValueError('Unsupported dataset : ' + config.dataset)
+
+    dataset = ScannetDataset(config.input_threads, load_test=(not on_val))
+
 
     # Create subsample clouds of the models
     dl0 = config.first_subsampling_dl
@@ -126,20 +93,9 @@ def test_caller(path, step_ind, on_val):
     print('**************\n')
     t1 = time.time()
 
-    if config.dataset.startswith('ShapeNetPart'):
-        model = KernelPointFCNN(dataset.flat_inputs, config)
-    elif config.dataset.startswith('S3DIS'):
-        model = KernelPointFCNN(dataset.flat_inputs, config)
-    elif config.dataset.startswith('Scannet'):
-        model = KernelPointFCNN(dataset.flat_inputs, config)
-    elif config.dataset.startswith('NPM3D'):
-        model = KernelPointFCNN(dataset.flat_inputs, config)
-    elif config.dataset.startswith('ModelNet40'):
-        model = KernelPointCNN(dataset.flat_inputs, config)
-    elif config.dataset.startswith('Semantic3D'):
-        model = KernelPointFCNN(dataset.flat_inputs, config)
-    else:
-        raise ValueError('Unsupported dataset : ' + config.dataset)
+
+    model = KernelPointFCNN(dataset.flat_inputs, config)
+
 
     # Find all snapshot in the chosen training folder
     snap_path = os.path.join(path, 'snapshots')
@@ -205,25 +161,9 @@ if __name__ == '__main__':
     # Choose the model to test
     ##########################
 
-    #
-    #   Here you can choose which model you want to test with the variable test_model. Here are the possible values :
-    #
-    #       > 'last_ModelNet40': Automatically retrieve the last trained model on ModelNet40
-    #
-    #       > 'last_ShapeNetPart': Automatically retrieve the last trained model on ShapeNetPart
-    #
-    #       > 'last_S3DIS': Automatically retrieve the last trained model on S3DIS
-    #
-    #       > 'last_Scannet': Automatically retrieve the last trained model on Scannet
-    #
-    #       > 'last_NPM3D': Automatically retrieve the last trained model on NPM3D
-    #
-    #       > 'last_Semantic3D': Automatically retrieve the last trained model on Semantic3D
-    #
-    #       > 'results/Log_YYYY-MM-DD_HH-MM-SS': Directly provide the path of a trained model
-    #
-
-    chosen_log = 'results/Log_2019-09-23_15-59-05'
+    
+    #specify your log path
+    chosen_log = ''
 
     #
     #   You can also choose the index of the snapshot to load (last by default)
@@ -236,42 +176,7 @@ if __name__ == '__main__':
     #
 
     on_val = True
-
-    #
-    #   If you want to modify certain parameters in the Config class, for example, to stop augmenting the input data,
-    #   there is a section for it in the function "test_caller" defined above.
-    #
-
-    ###########################
-    # Call the test initializer
-    ###########################
-
-    handled_logs = ['last_ModelNet40',
-                    'last_ShapeNetPart',
-                    'last_S3DIS',
-                    'last_Scannet',
-                    'last_NPM3D',
-                    'last_Semantic3D']
-
-    # Automatically retrieve the last trained model
-    if chosen_log in handled_logs:
-
-        # Dataset name
-        test_dataset = '_'.join(chosen_log.split('_')[1:])
-
-        # List all training logs
-        logs = np.sort([os.path.join('results', f) for f in os.listdir('results') if f.startswith('Log')])
-
-        # Find the last log of asked dataset
-        for log in logs[::-1]:
-            log_config = Config()
-            log_config.load(log)
-            if log_config.dataset.startswith(test_dataset):
-                chosen_log = log
-                break
-
-        if chosen_log in handled_logs:
-            raise ValueError('No log of the dataset "' + test_dataset + '" found')
+    
 
     # Check if log exists
     if not os.path.exists(chosen_log):
