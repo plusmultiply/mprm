@@ -797,9 +797,11 @@ if __name__ == '__main__':
     #start = 'Log_2019-09-27_13-30-09'
     #end = 'Log_2019-09-27_13-30-09'
     #logs = np.sort([join('results', l) for l in listdir('results') if start <= l <= end])
-    logs = ['/mnt/sdc1/jiacheng/kp_results/affinity']
+    
+    #enter log path here
+    logs = ['']
     # Give names to the logs (for legends)
-    logs_names = ['affinity']
+    logs_names = ['']
     logs_names = np.array(logs_names[:len(logs)])
 
     ################################################################
@@ -821,27 +823,9 @@ if __name__ == '__main__':
 
     # Plot the training loss and accuracy
     compare_trainings(logs, logs_names)
-    '''
+    
 
-    # Plot the validation
-    if plot_dataset.startswith('Shape'):
-        compare_convergences_multisegment(logs, logs_names)
-    elif plot_dataset.startswith('S3DIS'):
-        dataset = S3DISDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    elif plot_dataset.startswith('Model'):
-        dataset = ModelNet40Dataset()
-        compare_convergences_classif(dataset, logs, logs_names)
-    elif plot_dataset.startswith('Scann'):
-        dataset = ScannetDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    elif plot_dataset.startswith('Seman'):
-        dataset = Semantic3DDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    elif plot_dataset.startswith('NPM3D'):
-        dataset = NPM3DDataset()
-        compare_convergences_segment(dataset, logs, logs_names)
-    else:
-        raise ValueError('Unsupported dataset : ' + plot_dataset)
-'''
+
+    dataset = ScannetDataset()
+    compare_convergences_segment(dataset, logs, logs_names)
 
