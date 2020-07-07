@@ -149,8 +149,8 @@ if __name__ == '__main__':
 
     #
     #
-
-    chosen_log = '/mnt/sdc1/jiacheng/kp_results/psa_mb_no_dual_no_dp_4dim_again'
+    #saved model path
+    chosen_log = ''
 
     #
     #   You can also choose the index of the snapshot to load (last by default)
