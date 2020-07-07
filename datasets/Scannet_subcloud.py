@@ -129,7 +129,7 @@ class ScannetDataset(Dataset):
         ##########################
 
         # Path of the folder containing ply files
-        self.path = '/mnt/sdc1/jiacheng/Scannet/'
+        self.path = ''
 
 
         # Path of the training files
