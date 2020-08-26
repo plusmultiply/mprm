@@ -135,7 +135,7 @@ class ScannetDataset(Dataset):
         # Path of the training files
         self.train_path = join(self.path, 'training_points')
         self.test_path = join(self.path, 'test_points')
-        self.subcloud_label_path = join(self.path, 'subcloud_label')
+        self.subcloud_label_path = '/subcloud_label/'
 
         # Proportion of validation scenes
         self.validation_clouds = np.loadtxt(join(self.path, 'scannetv2_val.txt'), dtype=np.str)
