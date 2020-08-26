@@ -13,28 +13,30 @@ If you want to use [dense-crf](https://arxiv.org/abs/1210.5644) for post-process
 ## Training
 1. Download the Scannet dataset through the [official webcite](http://kaldir.vc.in.tum.de/scannet_benchmark/documentation).
 
-2. Modify the dataset path in `datasets/Scannet_subcloud.py` And start training:
+2. Extract the subcloud labels.
+
+3. Modify the dataset path in `datasets/Scannet_subcloud.py` And start training:
 ```
 python training_mprm.py
 ```
 You can also specify the model saving path and change parameters in `training_mprm.py`.
 
-3. You can plot the training details by speficy the saved model path and run:
+4. You can plot the training details by speficy the saved model path and run:
 ```
 python plot_convergence_mprm.py
 ```
 
-4. Generate the pseudo label by running:
+5. Generate the pseudo label by running:
 ```
 python generate_pseudo_label.py
 ```
 
-5. You can choose to post-process the pseudo-label by running:
+6. You can choose to post-process the pseudo-label by running:
 ```
 python crf_postprocessing.py
 ```
 
-6. Finally, use the pseudo label to train a segmentation network by running:
+7. Finally, use the pseudo label to train a segmentation network by running:
 ```
 python training_segmentation.py
 ```
