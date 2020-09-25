@@ -135,7 +135,6 @@ class ScannetDataset(Dataset):
         # Path of the training files
         self.train_path = join(self.path, 'training_points')
         self.test_path = join(self.path, 'test_points')
-        self.subcloud_label_path = '/subcloud_label/'
 
         # Proportion of validation scenes
         self.validation_clouds = np.loadtxt(join(self.path, 'scannetv2_val.txt'), dtype=np.str)
@@ -152,9 +151,9 @@ class ScannetDataset(Dataset):
         # Prepare ply files
         ###################
 
-        self.prepare_pointcloud_ply()
+        #self.prepare_pointcloud_ply()
 
-     def prepare_pointcloud_ply(self):
+    def prepare_pointcloud_ply(self):
 
         print('\nPreparing ply files')
         t0 = time.time()
@@ -309,9 +308,7 @@ class ScannetDataset(Dataset):
         self.input_trees = {'training': [], 'validation': [], 'test': []}
         self.input_colors = {'training': [], 'validation': [], 'test': []}
         self.input_vert_inds = {'training': [], 'validation': [], 'test': []}
-        #self.input_labels = {'training': [], 'validation': []}
-        self.input_anchors = {'training': [], 'validation': []}
-        self.subcloud_labels = {'training': [], 'validation': []}
+        self.input_labels = {'training': [], 'validation': []}
 
         # Advanced display
         N = len(files)
@@ -351,7 +348,6 @@ class ScannetDataset(Dataset):
                 data = read_ply(sub_ply_file)
                 sub_colors = np.vstack((data['red'], data['green'], data['blue'])).T
                 sub_vert_inds = data['vert_ind']
-                anchor_labels = np.load(join(self.subcloud_label_path, cloud_name)+'.npy')
                 if cloud_split == 'test':
                     sub_labels = None
                 else:
@@ -389,7 +385,6 @@ class ScannetDataset(Dataset):
 
                 # Get chosen neighborhoods
                 search_tree = KDTree(sub_points, leaf_size=50)
-                anchor_labels = np.load(join(self.subcloud_label_path, cloud_name) + '.npy')
 
                 # Save KDTree
                 with open(KDTree_file, 'wb') as f:
@@ -411,8 +406,7 @@ class ScannetDataset(Dataset):
             self.input_colors[cloud_split] += [sub_colors]
             self.input_vert_inds[cloud_split] += [sub_vert_inds]
             if cloud_split in ['training', 'validation']:
-                self.input_anchors[cloud_split] += [anchor_labels[:,:3]]
-                self.subcloud_labels[cloud_split] += [anchor_labels[:,3:]]
+                self.input_labels[cloud_split] += [sub_labels]
 
             print('', end='\r')
             print(fmt_str.format('#' * ((i * progress_n) // N), 100 * i / N), end='', flush=True)
@@ -421,8 +415,7 @@ class ScannetDataset(Dataset):
         self.input_trees['validation'] = self.input_trees['training']
         self.input_colors['validation'] = self.input_colors['training']
         self.input_vert_inds['validation'] = self.input_colors['training']
-        self.subcloud_labels['validation'] = self.subcloud_labels['training']
-        self.input_anchors['validation'] = self.input_anchors['training']
+        self.input_labels['validation'] = self.input_labels['training']
         self.num_training = len(self.input_trees['training'])
         self.num_validation = len(self.input_trees['validation'])
         self.num_test = len(self.input_trees['test'])
@@ -562,7 +555,26 @@ class ScannetDataset(Dataset):
         if not hasattr(self, 'anchors'):
             self.anchors = []
 
-
+        #generate sampling anchors for subclouds
+        def get_anchors(points):
+            n_anchors = []
+            x_max = points[:, 0].max()
+            x_min = points[:, 0].min()
+            y_max = points[:, 1].max()
+            y_min = points[:, 1].min()
+            z_max = points[:, 2].max()
+            z_min = points[:, 2].min()
+            x_step = np.floor((x_max - x_min) / config.in_radius) + 1
+            y_step = np.floor((y_max - y_min) / config.in_radius) + 1
+            z_step = np.floor((z_max - z_min) / config.in_radius) + 1
+            x_num = np.linspace(x_min, x_max, x_step)
+            y_num = np.linspace(y_min, y_max, y_step)
+            z_num = np.linspace(z_min, z_max, z_step)
+            for x in x_num:
+                for y in y_num:
+                    for z in z_num:
+                        n_anchors.append([x, y, z])
+            return np.array(n_anchors)
 
         # Reset potentials
         if split == 'training':
@@ -575,15 +587,15 @@ class ScannetDataset(Dataset):
 
         if split == 'training':
             for i, tree in enumerate(self.input_trees[data_split]):
-                #points = np.array(tree.data)
-                #anchor = get_anchors(points)
+                points = np.array(tree.data)
+                anchor = get_anchors(points)
                 #print(anchor)
                 #print(anchor.shape[0])
-                #self.anchors += [anchor]
+                self.anchors += [anchor]
                 #self.potentials[split]+= [np.random.rand(anchor.shape[0]) * 1e-3]
-                self.potentials[split] += [np.random.rand(len(self.input_anchors[data_split][i])) * 1e-3]
+                self.potentials[split] += [np.random.rand(len(anchor)) * 1e-3]
                 self.min_potentials[split] += [float(np.min(self.potentials[split][-1]))]
-            print(len(self.input_anchors[split]))
+            print(len(self.anchors))
             print(len(self.potentials[split]))
             print(len(self.min_potentials[split]))
 
@@ -627,7 +639,117 @@ class ScannetDataset(Dataset):
 
             return all_epoch_inds
 
+        def random_balanced_gen():
 
+            # First choose the point we are going to look at for this epoch
+            # *************************************************************
+
+            # This generator cannot be used on test split
+            if split == 'training':
+                all_epoch_inds = get_random_epoch_inds()
+            elif split == 'validation':
+                all_epoch_inds = get_random_epoch_inds()
+            else:
+                raise ValueError('generator to be defined for test split.')
+
+            # Now create batches
+            # ******************
+
+            # Initiate concatanation lists
+            p_list = []
+            c_list = []
+            pl_list = []
+            pi_list = []
+            ci_list = []
+            cl_list = []
+            cla_list = []
+
+
+            batch_n = 0
+
+            # Generator loop
+            for i, rand_i in enumerate(np.random.permutation(all_epoch_inds.shape[1])):
+
+                cloud_ind = all_epoch_inds[0, rand_i]
+                point_ind = all_epoch_inds[1, rand_i]
+
+                # Get points from tree structure
+                points = np.array(self.input_trees[split][cloud_ind].data, copy=False)
+
+                # Center point of input region
+                center_point = points[point_ind, :].reshape(1, -1)
+
+                # Add noise to the center point
+                noise = np.random.normal(scale=config.in_radius/10, size=center_point.shape)
+                pick_point = center_point + noise.astype(center_point.dtype)
+
+                # Indices of points in input region
+                input_inds = self.input_trees[split][cloud_ind].query_radius(pick_point,
+                                                                             r=config.in_radius)[0]
+
+                # Number collected
+                n = input_inds.shape[0]
+
+                # Safe check for very dense areas
+                if n > self.batch_limit:
+                    input_inds = np.random.choice(input_inds, size=int(self.batch_limit)-1, replace=False)
+                    n = input_inds.shape[0]
+
+                # Collect points and colors
+                # Generate subcloud label
+                input_points = (points[input_inds] - pick_point).astype(np.float32)
+                input_colors = self.input_colors[split][cloud_ind][input_inds]
+                input_labels = self.input_labels[split][cloud_ind][input_inds]
+                input_labels = np.array([self.label_to_idx[l] for l in input_labels])
+                cloud_labels_idx = np.unique(input_labels)
+                cloud_labels = np.zeros((1, config.num_classes))
+                cloud_labels[0][cloud_labels_idx] = 1
+                cloud_labels_all = np.ones((len(input_labels), config.num_classes))
+                cloud_labels_all = cloud_labels_all * cloud_labels
+
+                # In case batch is full, yield it and reset it
+                if batch_n + n > self.batch_limit and batch_n > 0:
+                    yield (np.concatenate(p_list, axis=0),
+                           np.concatenate(c_list, axis=0),
+                           np.concatenate(pl_list, axis=0),
+                           np.array([tp.shape[0] for tp in p_list]),
+                           np.concatenate(pi_list, axis=0),
+                           np.array(ci_list, dtype=np.int32),
+                           np.concatenate(cl_list, axis=0),
+                           np.concatenate(cla_list, axis=0))
+
+                    p_list = []
+                    c_list = []
+                    pl_list = []
+                    pi_list = []
+                    ci_list = []
+                    cl_list = []
+                    cla_list = []
+                    batch_n = 0
+
+                # Add data to current batch
+                if n > 0:
+                    p_list += [input_points]
+                    c_list += [np.hstack((input_colors, input_points + pick_point))]
+                    pl_list += [input_labels]
+                    pi_list += [input_inds]
+                    ci_list += [cloud_ind]
+                    cl_list += [cloud_labels]
+                    cla_list += [cloud_labels_all]
+
+                # Update batch size
+                batch_n += n
+
+            if batch_n > 0:
+                yield (np.concatenate(p_list, axis=0),
+                       np.concatenate(c_list, axis=0),
+                       np.concatenate(pl_list, axis=0),
+                       np.array([tp.shape[0] for tp in p_list]),
+                       np.concatenate(pi_list, axis=0),
+                       np.array(ci_list, dtype=np.int32),
+                       np.concatenate(cl_list, axis=0),
+                       np.concatenate(cla_list, axis=0)
+                       )
 
         def spatially_regular_gen():
 
@@ -665,7 +787,7 @@ class ScannetDataset(Dataset):
                     #print(len(self.anchors))
                     #print(len(self.anchors[cloud_ind]))
                     #print('......')
-                    center_point = self.input_anchors[split][cloud_ind][point_ind].reshape(1, -1)
+                    center_point = self.anchors[cloud_ind][point_ind].reshape(1, -1)
                     #center_point = self.anchors[cloud_ind][point_ind, :]
                 else:
                     center_point = points[point_ind, :].reshape(1, -1)
@@ -717,17 +839,13 @@ class ScannetDataset(Dataset):
                 if split in ['test', 'ERF']:
                     input_labels = np.zeros(input_points.shape[0])
                 else:
-                    #input_labels = self.subcloud_labels[data_split][cloud_ind][point_ind][1:]
-                    #input_labels = np.array([self.label_to_idx[l] for l in input_labels])
-                    #cloud_labels_idx = np.unique(input_labels)
-                    #cloud_labels_idx = cloud_labels_idx[cloud_labels_idx!=0].astype('int32')
-                    #cloud_labels = np.zeros((1, config.num_classes))
-                    #cloud_labels[0][cloud_labels_idx-1] = 1
-                    input_labels = np.zeros(input_points.shape[0])
-                    cloud_labels = self.subcloud_labels[data_split][cloud_ind][point_ind][1:]
-                    cloud_labels = cloud_labels.reshape(1,20)
-
-                    cloud_labels_all = np.ones((len(input_points), config.num_classes))
+                    input_labels = self.input_labels[data_split][cloud_ind][input_inds]
+                    input_labels = np.array([self.label_to_idx[l] for l in input_labels])
+                    cloud_labels_idx = np.unique(input_labels)
+                    cloud_labels_idx = cloud_labels_idx[cloud_labels_idx!=0].astype('int32')
+                    cloud_labels = np.zeros((1, config.num_classes))
+                    cloud_labels[0][cloud_labels_idx-1] = 1
+                    cloud_labels_all = np.ones((len(input_labels), config.num_classes))
                     cloud_labels_all = cloud_labels_all * cloud_labels
 
                 # In case batch is full, yield it and reset it
@@ -1236,5 +1354,4 @@ class ScannetDataset(Dataset):
 
 
         print('\nFinished\n\n')
-
 
