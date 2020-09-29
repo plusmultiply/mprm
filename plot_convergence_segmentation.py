@@ -9,9 +9,6 @@
 #
 #      Callable script to test any model on any dataset
 #
-# ----------------------------------------------------------------------------------------------------------------------
-#
-#      Hugues THOMAS - 11/06/2018
 #
 
 
@@ -35,12 +32,8 @@ from utils.metrics import IoU_from_confusions, smooth_metrics
 from utils.ply import read_ply
 
 # Datasets
-from datasets.ModelNet40 import ModelNet40Dataset
-from datasets.ShapeNetPart import ShapeNetPartDataset
-from datasets.S3DIS import S3DISDataset
 from datasets.Scannet import ScannetDataset
-from datasets.Semantic3D import Semantic3DDataset
-from datasets.NPM3D import NPM3DDataset
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #
