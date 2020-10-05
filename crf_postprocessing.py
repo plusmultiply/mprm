@@ -163,15 +163,15 @@ if __name__ == '__main__':
                 preds = label_values[preds]
                 Confs += [confusion_matrix(gt, preds, label_values)]
                 if save_result:
-                    val_name = join(pseudo_mask_path, cloud_name)
+                    #val_name = join(pseudo_mask_path, cloud_name)
 
                     # Save file
 
-                    write_ply(val_name,
-                              [points, rgb, preds, gt],
-                              ['x', 'y', 'z', 'red', 'green', 'blue', 'preds', 'class'])
-                #val_name = join(pseudo_mask_path, cloud_name)
-                #np.save(val_name + '.npy', preds)
+                    #write_ply(val_name,
+                    #          [points, rgb, preds, gt],
+                    #          ['x', 'y', 'z', 'red', 'green', 'blue', 'preds', 'class'])
+                    val_name = join(pseudo_mask_path, cloud_name)
+                    np.save(val_name + '.npy', preds)
             Confs_ori += [confusion_matrix(gt, ori_preds, label_values)]
 
             # save
